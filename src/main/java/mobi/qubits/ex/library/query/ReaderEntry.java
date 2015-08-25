@@ -77,7 +77,7 @@ public class ReaderEntry {
 		return borrowedBookIds.contains(bookId);
 	}	
 	
-	public int getNumberOdBooksBorrowed(){
+	public int getNumberOfBooksBorrowed(){
 		return borrowedBookIds.size();
 	}
 	

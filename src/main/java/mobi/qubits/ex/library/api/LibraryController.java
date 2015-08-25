@@ -5,14 +5,18 @@ import java.util.List;
 import javax.validation.Valid;
 
 import mobi.qubits.ex.library.api.requests.BookRequest;
+import mobi.qubits.ex.library.api.requests.RegisterBookRequest;
 import mobi.qubits.ex.library.api.requests.RegisterLibraryRequest;
 import mobi.qubits.ex.library.api.requests.RegisterReaderRequest;
 import mobi.qubits.ex.library.domain.commands.BorrowCommand;
+import mobi.qubits.ex.library.domain.commands.RegisterNewBookCommand;
 import mobi.qubits.ex.library.domain.commands.RegisterNewLibraryCommand;
 import mobi.qubits.ex.library.domain.commands.RegisterNewReaderCommand;
 import mobi.qubits.ex.library.domain.commands.ReturnCommand;
 import mobi.qubits.ex.library.query.BookEntry;
 import mobi.qubits.ex.library.query.BookEntryRepository;
+import mobi.qubits.ex.library.query.LibraryEntry;
+import mobi.qubits.ex.library.query.LibraryEntryRepository;
 import mobi.qubits.ex.library.query.ReaderEntry;
 import mobi.qubits.ex.library.query.ReaderEntryRepository;
 
@@ -49,6 +53,9 @@ public class LibraryController {
 
 	@Autowired
 	private ReaderEntryRepository readerEntryRepository;
+	
+	@Autowired
+	private LibraryEntryRepository libraryEntryRepository;
 
 	@Autowired
 	private CommandGateway cmdGateway;		
@@ -68,21 +75,21 @@ public class LibraryController {
 	}
 	
 	@RequestMapping(value = "/api/libraries", method = RequestMethod.GET)
-	public @ResponseBody List<ReaderEntry> findAllLibraries() {
-		return readerEntryRepository.findAll();
+	public @ResponseBody List<LibraryEntry> findAllLibraries() {
+		return libraryEntryRepository.findAll();
 	}	
 	
 	@RequestMapping(value = "/api/libraries/{id}", method = RequestMethod.GET)
-	public @ResponseBody ReaderEntry findLibrary(@PathVariable String id) {
-		return readerEntryRepository.findOne(id);
+	public @ResponseBody LibraryEntry findLibrary(@PathVariable String id) {
+		return libraryEntryRepository.findOne(id);
 	}
 	
 	@RequestMapping(value = "/api/libraries/{libraryId}/books", method = RequestMethod.POST)
 	@ResponseStatus(value = HttpStatus.CREATED)
 	public ResponseEntity<?> registerNewBook(
-			@RequestBody @Valid RegisterReaderRequest req, @PathVariable String libraryId,  UriComponentsBuilder b) {
+			@RequestBody @Valid RegisterBookRequest req, @PathVariable String libraryId,  UriComponentsBuilder b) {
 		String id = identifierFactory.generateIdentifier();
-		cmdGateway.send(new RegisterNewReaderCommand(libraryId, id, req.getName()));
+		cmdGateway.send(new RegisterNewBookCommand(libraryId, id, req.getTitle(), req.getAuthor()));
 
 		UriComponents uriComponents = b.path("/api/libraries/{libraryId}/books/{id}")
 				.buildAndExpand(libraryId, id);
@@ -92,13 +99,13 @@ public class LibraryController {
 	}
 	
 	@RequestMapping(value = "/api/libraries/{libraryId}/books", method = RequestMethod.GET)
-	public @ResponseBody List<ReaderEntry> findAllBooks() {
-		return readerEntryRepository.findAll();
+	public @ResponseBody List<BookEntry> findAllBooks() {
+		return bookEntryRepository.findAll();
 	}	
 	
 	@RequestMapping(value = "/api/libraries/{libraryId}/books/{bookId}", method = RequestMethod.GET)
-	public @ResponseBody ReaderEntry findBook( @PathVariable String libraryId, @PathVariable String bookId) {
-		return readerEntryRepository.findOne(bookId);
+	public @ResponseBody BookEntry findBook( @PathVariable String libraryId, @PathVariable String bookId) {
+		return bookEntryRepository.findOne(bookId);
 	}		
 		
 	@RequestMapping(value = "/api/libraries/{libraryId}/readers", method = RequestMethod.POST)
@@ -141,7 +148,7 @@ public class LibraryController {
 					req.getBookId(), HttpStatus.BAD_REQUEST);
 		}
 		
-		if (reader.getNumberOdBooksBorrowed()>=3){
+		if (reader.getNumberOfBooksBorrowed()>=3){
 			return errorResponse("Each reader can only borrow up to 3 books.", 
 					req.getBookId(), HttpStatus.BAD_REQUEST);
 		}

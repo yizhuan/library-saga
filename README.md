@@ -25,31 +25,32 @@ java -jar target/library-0.1.0.jar
 
 # Tests
 
-## Register books
-curl -X POST -d '{"title":"Lord of the Rings", "author": "J. R. R. Tolkien"}' -H "Content-Type:application/json" http://localhost:8080/api/books
-curl -X POST -d '{"title":"The Importance of Living", "author": "Lin Yutang"}' -H "Content-Type:application/json" http://localhost:8080/api/books
-curl -X POST -d '{"title":"War and Peace", "author": "Leo Tolstoy"}' -H "Content-Type:application/json" http://localhost:8080/api/books
-
+## Register Library
+curl -X POST -d '{"name":"Bantian District Library"}' -H "Content-Type:application/json" http://localhost:8080/api/libraries
 
 ## Register readers
-curl -X POST -d '{"name":"John Smith"}' -H "Content-Type:application/json" http://localhost:8080/api/readers
-curl -X POST -d '{"name":"Tom Hanks"}' -H "Content-Type:application/json" http://localhost:8080/api/readers
+curl -X POST -d '{"name":"John Smith"}' -H "Content-Type:application/json" http://localhost:8080/api/libraries/{libraryId}/readers
 
 
-## List books
-curl http://localhost:8080/api/books
+## Register books
+curl -X POST -d '{"title":"Lord of the Rings", "author": "J. R. R. Tolkien"}' -H "Content-Type:application/json" http://localhost:8080/api/libraries/{libraryId}/books
+
+## List libraries
+curl http://localhost:8080/api/libraries
+
 
 ## List readers
-curl http://localhost:8080/api/readers
+curl http://localhost:8080/api/libraries/{libraryId}/readers
+
+## List books
+curl http://localhost:8080/api/libraries/{libraryId}/books
 
 
 ## Borrow a book
-curl -X POST -d '{"bookId":"3f7bf042-489a-4d5a-b0cb-ba62bf71ae32"}' -H "Content-Type:application/json" http://localhost:8080/api/readers/a5704803-ec72-4748-9453-8b7ac40674cf/borrow
-
-curl -X POST -d '{"bookId":"dd6985cf-50b6-44b4-9cea-03c1770cb049"}' -H "Content-Type:application/json" http://localhost:8080/api/readers/a5704803-ec72-4748-9453-8b7ac40674cf/borrow
+curl -X POST -d '{"bookId":"3f7bf042-489a-4d5a-b0cb-ba62bf71ae32"}' -H "Content-Type:application/json" http://localhost:8080/api/libraries/{libraryId}/readers/{readerId}/borrow
 
 ## Return a book
-curl http://localhost:8080/api/readers/a5704803-ec72-4748-9453-8b7ac40674cf/return
+curl http://localhost:8080/api/libraries/{libraryId}/readers/{readerId}/return
 
 
 # Check MongoDB
@@ -72,12 +73,3 @@ system.indexes
 # TODO
 
 This version is just a rough sketch. Still lots to do.
-
-
-# Reference
-
-What is an aggregate?
-http://cqrs.nu/Faq/aggregates
-
-How You Can Implement Aggregates and Domain Entities Effectively in Domain Models
-https://www.youtube.com/watch?v=oFPbEi2463c&list=PLzsUBUx6tYGDmQEoi8i86eUar7moANEDS
